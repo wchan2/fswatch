@@ -7,6 +7,10 @@ import (
 	"io/ioutil"
 )
 
+func DefaultHashFunc(contents []byte) string {
+	return fmt.Sprintf("%x", md5.Sum(contents))
+}
+
 type Watcher interface {
 	Watch(filename []string) EventChannel
 }
@@ -26,10 +30,12 @@ func NewFileSystemWatcher(hashFn func([]byte) string) Watcher {
 }
 
 func (w *watcher) Watch(filenames []string) EventChannel {
+	w.cache.Update(w.calculateFileHashes(filenames))
+
 	go func() {
 		for {
 			fileHashes := w.calculateFileHashes(filenames)
-			if w.cache.Compare(fileHashes) {
+			if !w.cache.Equals(fileHashes) {
 				filesChanged := w.cache.Diff(fileHashes)
 				eventData, err := json.Marshal(map[string][]string{"changed": filesChanged})
 				if err != nil {
@@ -49,10 +55,11 @@ func (w *watcher) calculateFileHashes(filenames []string) map[string]string {
 	fileHashes := map[string]string{}
 	for _, filename := range filenames {
 		fileContents, err := ioutil.ReadFile(filename)
+
 		if err != nil {
 			panic(err.Error())
 		}
-		fileHashes[filename] = fmt.Sprintf("%x", md5.Sum(fileContents))
+		fileHashes[filename] = w.hashFn(fileContents)
 		if err != nil {
 			panic(err.Error())
 		}

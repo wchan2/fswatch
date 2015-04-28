@@ -1,7 +1,7 @@
 package fswatch
 
 type FSCache interface {
-	Compare(map[string]string) bool
+	Equals(map[string]string) bool
 	Update(map[string]string)
 	Diff(map[string]string) []string
 }
@@ -14,7 +14,7 @@ type cache struct {
 	contents map[string]string
 }
 
-func (c *cache) Compare(values map[string]string) bool {
+func (c *cache) Equals(values map[string]string) bool {
 	for key, value := range c.contents {
 		if values[key] != value {
 			return false
