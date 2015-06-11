@@ -1,9 +1,9 @@
 package fswatch
 
 type EventChannel <-chan Event
-type subscriber func(Event)
+type Subscriber func(Event)
 
-func (e EventChannel) Subscribe(callback subscriber) {
+func (e EventChannel) Subscribe(callback Subscriber) {
 	for event := range e {
 		callback(event)
 	}
