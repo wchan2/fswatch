@@ -17,16 +17,17 @@ go get github.com/wchan2/fswatch
 package main
 
 import (
-    "fmt"
+	"log"
 
-    "github.com/wchan2/fswatch/fswatch"
+	"github.com/wchan2/fswatch"
 )
 
 func main() {
-    fswatcher := fswatch.NewFileSystemWatcher(fswatch.DefaultHashFunc)
-    fswatcher.Watch([]string{"text.txt"}).Subscribe(func(e fswatch.Event) {
-        fmt.Println(e)
-    })   
+	fswatcher := fswatch.NewFileSystemWatcher([]string{"text.txt"})
+	fswatcher.Subscribe(func(event fswatch.Event) {
+		log.Print(event)
+	})
+	fswatcher.Start()
 }
 ```
 
