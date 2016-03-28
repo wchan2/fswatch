@@ -1,36 +1,39 @@
-## fswatch
+## fswatch [![Build Status](https://travis-ci.org/wchan2/fswatch.svg?branch=master)](https://travis-ci.org/wchan2/fswatch)
 
-A command line tool and library package for watching file system changes.
+A library package for watching file system changes.
 
-### Installing the Command Line Tool and the Library
-
-Install and build the binary.
+### Installation
 
 ```
 go get github.com/wchan2/fswatch
 ```
 
 
-### A Library Example
+### Example
 
 ```go
 package main
 
 import (
-	"log"
-
 	"github.com/wchan2/fswatch"
+
+	"log"
 )
 
 func main() {
-	fswatcher := fswatch.NewFileSystemWatcher([]string{"text.txt"})
-	fswatcher.Subscribe(func(event fswatch.Event) {
-		log.Print(event)
-	})
-	fswatcher.Start()
+	eventQ := make(chan fswatch.Event)
+	fswatcher := fswatch.NewFileSystemWatcher(eventQ, []string{"text.txt"})
+	go fswatcher.Start()
+	defer fswatcher.Stop()
+
+	for {
+		select {
+		case event := <-eventQ:
+			log.Print(event)
+		}
+	}
 }
 ```
-
 
 ## License
 

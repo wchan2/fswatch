@@ -1,15 +1,21 @@
 package main
 
 import (
-	"log"
-
 	"github.com/wchan2/fswatch"
+
+	"log"
 )
 
 func main() {
-	fswatcher := fswatch.NewFileSystemWatcher([]string{"text.txt"})
-	fswatcher.Subscribe(func(event fswatch.Event) {
-		log.Print(event)
-	})
-	fswatcher.Start()
+	eventQ := make(chan fswatch.Event)
+	fswatcher := fswatch.NewFileSystemWatcher(eventQ, []string{"text.txt"})
+	go fswatcher.Start()
+	defer fswatcher.Stop()
+
+	for {
+		select {
+		case event := <-eventQ:
+			log.Print(event)
+		}
+	}
 }

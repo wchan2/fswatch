@@ -4,20 +4,19 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"time"
 )
 
 type FileSystemWatcher struct {
 	filenames []string
-	eventQ    chan Event
+	eventQ    chan<- Event
 	cache     *fileSystemCache
 }
 
-func NewFileSystemWatcher(filenames []string) *FileSystemWatcher {
+func NewFileSystemWatcher(eventQ chan<- Event, filenames []string) *FileSystemWatcher {
 	watcher := &FileSystemWatcher{
 		filenames: filenames,
-		eventQ:    make(chan Event),
+		eventQ:    eventQ,
 		cache:     newFileSystemCache(),
 	}
 	watcher.cache.Set(watcher.fileHashes())
@@ -28,7 +27,6 @@ func (f *FileSystemWatcher) Start() {
 	for {
 		newFileHashes := f.fileHashes()
 		if !f.cache.Equals(newFileHashes) {
-			log.Printf("changed twice?", newFileHashes)
 			filesChanged := f.cache.Diff(newFileHashes)
 			events := map[string][]string{
 				"changed": filesChanged,
@@ -39,14 +37,6 @@ func (f *FileSystemWatcher) Start() {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
-}
-
-func (f *FileSystemWatcher) Subscribe(callback func(Event)) {
-	go func() {
-		for event := range f.eventQ {
-			callback(event)
-		}
-	}()
 }
 
 func (f *FileSystemWatcher) Stop() {
