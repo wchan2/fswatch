@@ -8,7 +8,11 @@ import (
 
 func main() {
 	eventQ := make(chan fswatch.Event)
-	fswatcher := fswatch.NewFileSystemWatcher(eventQ, []string{"text.txt"})
+	fswatcher := fswatch.NewFileSystemWatcher(
+		[]string{"**/*"},
+		eventQ,
+	)
+
 	go fswatcher.Start()
 	defer fswatcher.Stop()
 
