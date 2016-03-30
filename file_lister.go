@@ -62,18 +62,17 @@ func NewRecursiveWildCardFileLister(directory string) *RecursiveWildCardFileList
 
 func (l *RecursiveWildCardFileLister) ListFiles() (returnFiles []string) {
 	directories := []string{l.directory}
-	for _, directory := range directories {
-		files, err := ioutil.ReadDir(directory)
+	for i := 0; i < len(directories); i++ {
+		files, err := ioutil.ReadDir(directories[i])
 		if err != nil {
-			log.Printf("Unable to list files in %s", directory)
+			log.Printf("Unable to list files in %s", directories[i])
 			continue
 		}
 		for _, file := range files {
-			directories := []string{}
 			if file.IsDir() {
-				directories = append(directories, strings.Join([]string{directory, file.Name()}, "/"))
+				directories = append(directories, strings.Join([]string{directories[i], file.Name()}, "/"))
 			} else {
-				returnFiles = append(returnFiles, strings.Join([]string{directory, file.Name()}, "/"))
+				returnFiles = append(returnFiles, strings.Join([]string{directories[i], file.Name()}, "/"))
 			}
 		}
 	}
