@@ -4,36 +4,36 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"time"
 )
 
 type FileSystemWatcher struct {
-	filenames []string
-	eventQ    chan<- Event
-	cache     *fileSystemCache
+	FileLister
+	eventQ chan<- Event
+	cache  StringCache
 }
 
-func NewFileSystemWatcher(eventQ chan<- Event, filenames []string) *FileSystemWatcher {
+func NewFileSystemWatcher(filenames []string, eventQ chan<- Event) *FileSystemWatcher {
 	watcher := &FileSystemWatcher{
-		filenames: filenames,
-		eventQ:    eventQ,
-		cache:     newFileSystemCache(),
+		FileLister: NewCompositeFileLister(filenames),
+		eventQ:     eventQ,
 	}
-	watcher.cache.Set(watcher.fileHashes())
+	watcher.cache = watcher.fileHashes()
 	return watcher
 }
 
 func (f *FileSystemWatcher) Start() {
 	for {
-		newFileHashes := f.fileHashes()
-		if !f.cache.Equals(newFileHashes) {
-			filesChanged := f.cache.Diff(newFileHashes)
-			events := map[string][]string{
+		newHashes := f.fileHashes()
+
+		// TODO: iterate over current hashes and figure out if a file is changed, created, deleted to propagate the correct event
+		if !f.cache.Equals(newHashes) {
+			filesChanged := f.cache.Diff(newHashes)
+			f.cache = newHashes
+			f.eventQ <- NewEvent(FileChanged, map[string][]string{
 				"changed": filesChanged,
-				// "created": filesCreated,
-			}
-			f.cache.Set(newFileHashes)
-			f.eventQ <- NewEvent(FileChange, events)
+			})
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
@@ -45,16 +45,13 @@ func (f *FileSystemWatcher) Stop() {
 
 func (f *FileSystemWatcher) fileHashes() map[string]string {
 	fileHashes := map[string]string{}
-	for _, filename := range f.filenames {
+	for _, filename := range f.ListFiles() {
 		fileContents, err := ioutil.ReadFile(filename)
-
 		if err != nil {
-			panic(err.Error())
+			log.Printf("Unable to open file %s because of %s", filename, err.Error())
+			continue
 		}
 		fileHashes[filename] = f.hash(fileContents)
-		if err != nil {
-			panic(err.Error())
-		}
 	}
 	return fileHashes
 }

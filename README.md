@@ -8,7 +8,6 @@ A library package for watching file system changes.
 go get github.com/wchan2/fswatch
 ```
 
-
 ### Example
 
 ```go
@@ -22,7 +21,11 @@ import (
 
 func main() {
 	eventQ := make(chan fswatch.Event)
-	fswatcher := fswatch.NewFileSystemWatcher(eventQ, []string{"text.txt"})
+	fswatcher := fswatch.NewFileSystemWatcher(
+		[]string{"**/*"},
+		eventQ,
+	)
+
 	go fswatcher.Start()
 	defer fswatcher.Stop()
 
@@ -34,6 +37,12 @@ func main() {
 	}
 }
 ```
+
+## TODO
+
+A list of tasks to be completed
+
+- [ ] Benchmark fswatch when there are a lot of files, large and small
 
 ## License
 
