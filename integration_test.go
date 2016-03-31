@@ -48,10 +48,7 @@ var _ = Describe(`FileSystemWatcher`, func() {
 
 		It(`receives an event for a created file`, func() {
 			Expect(<-eventQ).To(Equal(fswatch.Event{
-				Type: "CHANGED",
-				Data: map[string][]string{
-					"changed": {"./testing/test_file.txt"},
-				},
+				FilesCreated: []string{"./testing/test_file.txt"},
 			}))
 		})
 	})

@@ -26,14 +26,14 @@ func NewFileSystemWatcher(filenames []string, eventQ chan<- Event) *FileSystemWa
 func (f *FileSystemWatcher) Start() {
 	for {
 		newHashes := f.fileHashes()
-
-		// TODO: iterate over current hashes and figure out if a file is changed, created, deleted to propagate the correct event
 		if !f.cache.Equals(newHashes) {
-			filesChanged := f.cache.Diff(newHashes)
+			created, modified, deleted := f.cache.Diff(newHashes)
 			f.cache = newHashes
-			f.eventQ <- NewEvent(FileChanged, map[string][]string{
-				"changed": filesChanged,
-			})
+			f.eventQ <- Event{
+				FilesModified: modified,
+				FilesCreated:  created,
+				FilesDeleted:  deleted,
+			}
 		}
 		time.Sleep(200 * time.Millisecond)
 	}

@@ -17,12 +17,15 @@ func (c StringCache) Equals(cache StringCache) bool {
 	return true
 }
 
-func (c StringCache) Diff(cache StringCache) (diff []string) {
+func (c StringCache) Diff(cache StringCache) (created, modified, deleted []string) {
 	mergedCache := Merge(c, cache)
-	for key, value := range mergedCache {
-		// updated value for key or a value does not exist for a pre-existing key
-		if _, ok := cache[key]; (value != c[key] && value == cache[key]) || !ok {
-			diff = append(diff, key)
+	for key := range mergedCache {
+		if _, ok := c[key]; !ok {
+			created = append(created, key)
+		} else if _, ok := cache[key]; !ok {
+			deleted = append(deleted, key)
+		} else if cache[key] != c[key] {
+			modified = append(modified, key)
 		}
 	}
 	return

@@ -1,21 +1,15 @@
 package fswatch
 
-const (
-	FileCreated FileEvent = "CREATED"
-	FileChanged FileEvent = "CHANGED"
-	FileDeleted FileEvent = "DELETED"
-)
-
-type FileEvent string
-
 type Event struct {
-	Type FileEvent
-	Data map[string][]string
+	FilesModified []string
+	FilesCreated  []string
+	FilesDeleted  []string
 }
 
-func NewEvent(eventType FileEvent, data map[string][]string) Event {
+func NewEvent(filesModified, filesCreated, filesDeleted []string) Event {
 	return Event{
-		Type: eventType,
-		Data: data,
+		FilesModified: filesModified,
+		FilesCreated:  filesCreated,
+		FilesDeleted:  filesDeleted,
 	}
 }
