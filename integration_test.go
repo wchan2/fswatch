@@ -25,7 +25,7 @@ var _ = Describe(`FileSystemWatcher`, func() {
 		})
 
 		JustBeforeEach(func() {
-			go fswatcher.Start()
+			go fswatcher.Run()
 
 			if err := os.Mkdir("testing", os.ModePerm); err != nil {
 				log.Fatal(err.Error())

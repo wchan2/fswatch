@@ -1,6 +1,7 @@
 package fswatch
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -70,9 +71,9 @@ func (l *RecursiveWildCardFileLister) ListFiles() (returnFiles []string) {
 		}
 		for _, file := range files {
 			if file.IsDir() {
-				directories = append(directories, strings.Join([]string{directories[i], file.Name()}, "/"))
+				directories = append(directories, fmt.Sprintf("%s/%s", directories[i], file.Name()))
 			} else {
-				returnFiles = append(returnFiles, strings.Join([]string{directories[i], file.Name()}, "/"))
+				returnFiles = append(returnFiles, fmt.Sprintf("%s/%s", directories[i], file.Name()))
 			}
 		}
 	}

@@ -23,7 +23,7 @@ func NewFileSystemWatcher(filenames []string, eventQ chan<- Event) *FileSystemWa
 	return watcher
 }
 
-func (f *FileSystemWatcher) Start() {
+func (f *FileSystemWatcher) Run() {
 	for {
 		newHashes := f.fileHashes()
 		if !f.cache.Equals(newHashes) {
