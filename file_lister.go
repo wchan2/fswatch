@@ -34,15 +34,17 @@ func (l *CompositeFileLister) ListFiles() (files []string) {
 	return
 }
 
-func NewFileLister(fileExpression string) (fileLister FileLister) {
-	if fileExpression == "**/*" {
-		fileLister = NewRecursiveWildCardFileLister(".")
+func NewFileLister(fileExpression string) FileLister {
+	if strings.HasSuffix(fileExpression, "**/*") && fileExpression != "**/*" {
+		return NewRecursiveWildCardFileLister(strings.TrimRight(fileExpression, "**/*"))
+	} else if fileExpression == "**/*" {
+		return NewRecursiveWildCardFileLister(".")
 	} else if fileExpression == "*" {
-		fileLister = NewCurrentDirFileLister()
+		return NewCurrentDirFileLister()
 	} else if strings.HasPrefix(fileExpression, "*") && strings.Count(fileExpression, "*") == 1 {
-		fileLister = NewCurrentDirFileExtensionLister()
+		return NewCurrentDirFileExtensionLister()
 	} else if !strings.Contains(fileExpression, "*") {
-		fileLister = NewNamedFileLister(fileExpression)
+		return NewNamedFileLister(fileExpression)
 	}
 
 	// TODO
@@ -50,7 +52,7 @@ func NewFileLister(fileExpression string) (fileLister FileLister) {
 	// - **/*.mp4
 	// - **/test.mp4
 	// - test/test.mp4
-	return
+	return NewCurrentDirFileLister()
 }
 
 type RecursiveWildCardFileLister struct {

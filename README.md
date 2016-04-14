@@ -26,7 +26,7 @@ func main() {
 		eventQ,
 	)
 
-	go fswatcher.Start()
+	go fswatcher.Run()
 	defer fswatcher.Stop()
 
 	for {
